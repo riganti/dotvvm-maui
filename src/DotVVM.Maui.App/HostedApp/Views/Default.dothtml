@@ -1,0 +1,22 @@
+﻿@viewModel DotVVM.Maui.App.HostedApp.ViewModels.DefaultViewModel, DotVVM.Maui.App
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+
+    <h1>Hello</h1>
+
+    <p>
+        Counter: {{value: Value}}
+    </p>
+
+    <p>
+        <dot:Button Text="Increment" Click="{command: Increment()}" />
+    </p>
+
+</body>
+</html>
