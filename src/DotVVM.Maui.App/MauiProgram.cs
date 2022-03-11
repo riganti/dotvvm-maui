@@ -16,7 +16,7 @@ public static class MauiProgram
 			});
 
 		var path = Path.Combine(Path.GetDirectoryName(typeof(MauiProgram).Assembly.Location), "HostedApp");
-		builder.AddMauiDotvvmWebView<DotvvmStartup, DotvvmStartup>(path);
+		builder.AddMauiDotvvmWebView<DotvvmStartup, DotvvmStartup>(path, true);
 
 		return builder.Build();
 	}

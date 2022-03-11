@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
+using DotVVM.Hosting.Maui.Services;
 
 namespace DotVVM.Hosting.Maui
 {
@@ -24,48 +25,45 @@ namespace DotVVM.Hosting.Maui
     {
 
 		/// <summary>
-		/// Configures <see cref="IServiceCollection"/> to add support for <see cref="DotvvmWebView"/>.
+		/// Configures <see cref="MauiAppBuilder"/> to add support for <see cref="DotvvmWebView"/>.
 		/// </summary>
-		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
-		/// <returns>The <see cref="IServiceCollection"/>.</returns>
+		/// <param name="builder">The <see cref="MauiAppBuilder"/>.</param>
+		/// <returns>The <see cref="MauiAppBuilder"/>.</returns>
 #if WEBVIEW2_WINFORMS
-		public static MauiAppBuilder AddWindowsFormsDotvvmWebView(this MauiAppBuilder builder)
+		public static MauiAppBuilder AddWindowsFormsDotvvmWebView<TDotvvmStartup, TDotvvmServiceConfigurator>(
 #elif WEBVIEW2_WPF
-		public static MauiAppBuilder AddWpfDotvvmWebView(this MauiAppBuilder builder)
+		public static MauiAppBuilder AddWpfDotvvmWebView<TDotvvmStartup, TDotvvmServiceConfigurator>(
 #elif WEBVIEW2_MAUI
-		public static MauiAppBuilder AddMauiDotvvmWebView<TDotvvmStartup, TDotvvmServiceConfigurator>(this MauiAppBuilder builder, string applicationPath)
-			where TDotvvmStartup : IDotvvmStartup, new()
-			where TDotvvmServiceConfigurator : IDotvvmServiceConfigurator, new()
+		public static MauiAppBuilder AddMauiDotvvmWebView<TDotvvmStartup, TDotvvmServiceConfigurator>(
 #else
 #error Must define WEBVIEW2_WINFORMS, WEBVIEW2_WPF, WEBVIEW2_MAUI
 #endif
-		{
-#if WEBVIEW2_MAUI
-			// TODO
-			// services.TryAddSingleton<MauiDotvvmMarkerService>();
-			builder.ConfigureMauiHandlers(static handlers => handlers.AddHandler<IDotvvmWebView, DotvvmWebViewHandler>());
-#elif WEBVIEW2_WINFORMS
-			services.TryAddSingleton<WindowsFormsDotvvmMarkerService>();
-#elif WEBVIEW2_WPF
-			services.TryAddSingleton<WpfDotvvmMarkerService>();
-#endif
+			this MauiAppBuilder builder, 
+			string applicationPath,
+			bool debug = false,
+			Action<DotvvmConfiguration> configure = null)
+			where TDotvvmStartup : IDotvvmStartup, new()
+			where TDotvvmServiceConfigurator : IDotvvmServiceConfigurator, new()
 
+		{
+			builder.ConfigureMauiHandlers(static handlers => handlers.AddHandler<IDotvvmWebView, DotvvmWebViewHandler>());
+			
 			builder.Services.AddDotVVM<TDotvvmServiceConfigurator>();
 			builder.Services.AddSingleton<IWebHostEnvironment>(new DotvvmWebHostEnvironment()
-            {
+			{
+				EnvironmentName = debug ? "Development" : "Production",
+				ApplicationName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name,
 				ContentRootPath = applicationPath,
-				WebRootPath = Path.Combine(applicationPath, "wwwroot")				
-            });
+				WebRootPath = Path.Combine(applicationPath, "wwwroot")
+			});
 			builder.Services.AddSingleton<RequestDelegate>(provider =>
 			{
 				var factory = new ApplicationBuilderFactory(provider);
-				var serverFeatures = new FeatureCollection();
-				serverFeatures.Set(new Microsoft.AspNetCore.Http.Features.HttpRequestFeature());
-				serverFeatures.Set(new Microsoft.AspNetCore.Http.Features.HttpResponseFeature());
-				var appBuilder = factory.CreateBuilder(serverFeatures);
-				appBuilder.UseDotVVM<TDotvvmStartup>(applicationPath, true);
+				var appBuilder = factory.CreateBuilder(new FeatureCollection());
+				appBuilder.UseDotVVM<TDotvvmStartup>(applicationPath, debug, configure);
 				return appBuilder.Build();
 			});
+			builder.Services.AddSingleton<DotvvmWebRequestHandler>();
 
 			return builder;
 		}

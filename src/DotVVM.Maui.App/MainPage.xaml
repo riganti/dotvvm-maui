@@ -4,5 +4,5 @@
              x:Class="DotVVM.Maui.App.MainPage"
              BackgroundColor="{DynamicResource SecondaryColor}">
 
-    <dotvvm:DotvvmWebView HostPage="HostedApp/index.html" />
+    <dotvvm:DotvvmWebView />
 </ContentPage>
