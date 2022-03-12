@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using DotVVM.Framework.Configuration;
+using DotVVM.Hosting.Maui.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui;
 using Microsoft.Maui.Handlers;
@@ -102,14 +103,20 @@ namespace DotVVM.Hosting.Maui.Controls
 			}
 			set
             {
-                NavigateToRoute(value);
+				if (!string.IsNullOrEmpty(value) && value != routeName)
+				{
+					NavigateToRoute(value);
+				}
             }
         }
 
         protected void NavigateToRoute(string value)
         {
+			// make sure DotVVM is initialized
+			Services.GetRequiredService<DotvvmWebRequestHandler>();
+
             var route = Services.GetRequiredService<DotvvmConfiguration>().RouteTable[value];
-            var url = route.BuildUrl(value);
+            var url = route.BuildUrl().TrimStart('~');
 
             routeName = value;
             Url = url;
@@ -119,11 +126,14 @@ namespace DotVVM.Hosting.Maui.Controls
 		{
 			get
 			{
-				return NativeView.Source.ToString();
+				return NativeView.Source?.ToString();
 			}
 			set
 			{
-				_webviewManager.Navigate(value);
+				if (!string.IsNullOrEmpty(value))
+				{
+					_webviewManager?.Navigate(value);
+				}
 			}
 		}
 
@@ -156,14 +166,12 @@ namespace DotVVM.Hosting.Maui.Controls
 			var messageId = Guid.NewGuid();
 			var json = JsonConvert.SerializeObject(new PatchViewModelMessage(patch, messageId), serializerSettings.Value);
 			_webviewManager.SendMessage(json);
-			return WaitForMessage(messageId);
+			return WaitForMessage<object>(messageId);
 		}
 
 
 
 		private Dictionary<Guid, TaskCompletionSource<string>> incomingMessageQueue = new();
-
-		private Task WaitForMessage(Guid messageId) => WaitForMessage<object>(messageId);
 
 		private async Task<T> WaitForMessage<T>(Guid messageId)
         {
@@ -181,30 +189,45 @@ namespace DotVVM.Hosting.Maui.Controls
 			if (type == "handlerCommand")
             {
 				// get response to the command from the handler
-				var messageId = data["messageId"].Value<Guid>();
-				incomingMessageQueue.Remove(messageId, out var source);
+				var messageId = data["messageId"].Value<string>();
+				incomingMessageQueue.Remove(Guid.Parse(messageId), out var source);
 
-				var result = data["result"].ToString();
-				source.SetResult(result);
-            }
+				if (!data.TryGetValue("errorMessage", out var errorMessage))
+                {
+					source.SetResult(data["result"].Value<string>());
+				}
+				else
+                {
+					source.SetException(new Exception("Command failed! " + errorMessage.Value<string>()));
+                }
+			}
 			else if (type == "navigationCompleted")
             {
-				routeName = data["routeName"].Value<string>();
-				// TODO: notify property changed
+				var routeName = data["routeName"].Value<string>();
+				if (routeName != RouteName)
+				{
+					this.routeName = routeName;
+					VirtualView.RouteName = routeName;
+				}
+            }
+			else if (type == "pageNotification")
+            {
+				var args = new PageNotificationEventArgs(data["methodName"].Value<string>(), ((JArray)data["args"]).Values<object>().ToArray());
+				PageNotificationReceived?.Invoke(args);
             }
         }
 	}
 
-	public record CallNamedCommandMessage(string ElementSelector, string CommandName, object[] Args, Guid MessageId)
+	public record CallNamedCommandMessage(string elementSelector, string commandName, object[] args, Guid messageId)
     {
-		public string Action => nameof(DotvvmWebViewHandler.CallNamedCommand);
+		public string action => nameof(DotvvmWebViewHandler.CallNamedCommand);
     }
-	public record GetViewModelSnapshotMessage(Guid MessageId)
+	public record GetViewModelSnapshotMessage(Guid messageId)
 	{
-		public string Action => nameof(DotvvmWebViewHandler.GetViewModelSnapshot);
+		public string action => nameof(DotvvmWebViewHandler.GetViewModelSnapshot);
 	}
-	public record PatchViewModelMessage(object Patch, Guid MessageId)
+	public record PatchViewModelMessage(object patch, Guid messageId)
 	{
-		public string Action => nameof(DotvvmWebViewHandler.PatchViewModel);
+		public string action => nameof(DotvvmWebViewHandler.PatchViewModel);
 	}
 }

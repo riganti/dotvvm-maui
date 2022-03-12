@@ -16,8 +16,21 @@ namespace DotVVM.Hosting.Maui.Controls
 		{
 		}
 
-        public string RouteName { get; set; }
-        public string Url { get; set; }
+        public string RouteName
+        {
+            get { return (string)GetValue(RouteNameProperty); }
+            set { SetValue(RouteNameProperty, value); }
+        }
+        public static readonly BindableProperty RouteNameProperty =
+            BindableProperty.Create(nameof(RouteName), typeof(string), typeof(DotvvmWebView), "", BindingMode.TwoWay);
+
+        public string Url
+        {
+            get { return (string)GetValue(UrlProperty); }
+            set { SetValue(UrlProperty, value); }
+        }
+        public static readonly BindableProperty UrlProperty =
+            BindableProperty.Create(nameof(Url), typeof(string), typeof(DotvvmWebView), "", BindingMode.TwoWay);
 
         /// <inheritdoc/>
         public event EventHandler<ExternalLinkNavigationEventArgs>? ExternalNavigationStarting;

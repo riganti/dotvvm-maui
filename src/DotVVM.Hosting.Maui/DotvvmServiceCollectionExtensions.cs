@@ -18,6 +18,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using DotVVM.Hosting.Maui.Services;
+using DotVVM.Framework.Controls;
+using DotVVM.Framework.ResourceManagement;
+using Microsoft.Extensions.FileProviders;
+using DotVVM.Hosting.Maui.Binding;
 
 namespace DotVVM.Hosting.Maui
 {
@@ -44,23 +48,38 @@ namespace DotVVM.Hosting.Maui
 			Action<DotvvmConfiguration> configure = null)
 			where TDotvvmStartup : IDotvvmStartup, new()
 			where TDotvvmServiceConfigurator : IDotvvmServiceConfigurator, new()
-
 		{
 			builder.ConfigureMauiHandlers(static handlers => handlers.AddHandler<IDotvvmWebView, DotvvmWebViewHandler>());
 			
 			builder.Services.AddDotVVM<TDotvvmServiceConfigurator>();
-			builder.Services.AddSingleton<IWebHostEnvironment>(new DotvvmWebHostEnvironment()
+
+			var environment = new DotvvmWebHostEnvironment()
 			{
 				EnvironmentName = debug ? "Development" : "Production",
 				ApplicationName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name,
 				ContentRootPath = applicationPath,
 				WebRootPath = Path.Combine(applicationPath, "wwwroot")
-			});
+			};
+			environment.WebRootFileProvider = new PhysicalFileProvider(environment.WebRootPath);
+
+			builder.Services.AddSingleton<IWebHostEnvironment>(environment);
 			builder.Services.AddSingleton<RequestDelegate>(provider =>
 			{
 				var factory = new ApplicationBuilderFactory(provider);
 				var appBuilder = factory.CreateBuilder(new FeatureCollection());
-				appBuilder.UseDotVVM<TDotvvmStartup>(applicationPath, debug, configure);
+				appBuilder.UseDotVVM<TDotvvmStartup>(applicationPath, debug, config => 
+				{
+					config.Resources.Register("dotvvm.webview.js", new ScriptResource(new EmbeddedResourceLocation(typeof(DotvvmServiceCollectionExtensions).Assembly, "DotVVM.Hosting.Maui.Scripts.dotvvm.webview.js"))
+                    {
+						Dependencies = new[] { ResourceConstants.DotvvmResourceName }
+                    });
+					config.Styles.RegisterRoot().Append(new RequiredResource() { Name = "dotvvm.webview.js" });
+					config.Markup.DefaultExtensionParameters.Add(new WebViewExtensionParameter());
+					WebViewBindingApi.RegisterJavascriptTranslations(config.Markup.JavascriptTranslator.MethodCollection);
+
+					configure?.Invoke(config);
+				});
+				appBuilder.UseStaticFiles();
 				return appBuilder.Build();
 			});
 			builder.Services.AddSingleton<DotvvmWebRequestHandler>();

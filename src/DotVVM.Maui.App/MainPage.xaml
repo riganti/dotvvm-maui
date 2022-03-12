@@ -1,8 +1,32 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:dotvvm="clr-namespace:DotVVM.Hosting.Maui.Controls;assembly=DotVVM.Hosting.Maui"
+             xmlns:local="clr-namespace:DotVVM.Maui.App"
              x:Class="DotVVM.Maui.App.MainPage"
+             x:DataType="local:MainPageViewModel"
              BackgroundColor="{DynamicResource SecondaryColor}">
 
-    <dotvvm:DotvvmWebView />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="400"/>
+        </Grid.RowDefinitions>
+
+        <HorizontalStackLayout Grid.Row="0">
+            <Label Text="Route" />
+            <Label Text="{Binding RouteName}" />
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout Grid.Row="1">
+            <Button Text="Get ViewModel State" Clicked="GetViewModelStateButton_Clicked" />
+            <Button Text="Patch ViewModel" Clicked="PatchViewModelButton_Clicked" />
+            <Button Text="Call NamedCommand" Clicked="CallNamedCommandButton_Clicked" />
+        </HorizontalStackLayout>
+
+        <dotvvm:DotvvmWebView x:Name="DotvvmPage" 
+                              RouteName="{Binding RouteName}" 
+                              PageNotificationReceived="DotvvmPage_PageNotificationReceived"
+                              Grid.Row="2" />
+    </Grid>
 </ContentPage>

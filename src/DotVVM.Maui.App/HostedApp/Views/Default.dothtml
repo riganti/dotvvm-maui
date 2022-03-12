@@ -1,4 +1,6 @@
 ﻿@viewModel DotVVM.Maui.App.HostedApp.ViewModels.DefaultViewModel, DotVVM.Maui.App
+@js emptyModule
+
 <!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -16,6 +18,16 @@
 
     <p>
         <dot:Button Text="Increment" Click="{command: Increment()}" />
+    </p>
+    
+    <dot:NamedCommand Name="IncrementBy" Command="{staticCommand: (int i) => Value = Value + i}" />
+
+    <p>
+        <dot:RouteLink Text="Second page" RouteName="Second" />
+    </p>
+
+    <p>
+        <dot:Button Text="Send notification to host" Click="{staticCommand: _webview.SendNotification("Hello")}" />
     </p>
 
 </body>

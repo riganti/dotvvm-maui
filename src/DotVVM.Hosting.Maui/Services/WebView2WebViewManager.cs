@@ -172,7 +172,7 @@ namespace DotVVM.Hosting.Maui.Services
 #endif
 				.ConfigureAwait(true);
 
-			_webview.CoreWebView2.WebMessageReceived += (s, e) => OnMessageReceived(new Uri(e.Source), e.TryGetWebMessageAsString());
+			_webview.CoreWebView2.WebMessageReceived += (s, e) => OnMessageReceived(new Uri(e.Source), e.WebMessageAsJson);
 		}
 
 		/// <summary>

@@ -54,20 +54,24 @@
 
 	<ItemGroup>
 	  <None Remove="HostedApp\Views\Default.dothtml" />
+	  <None Remove="HostedApp\Views\Second.dothtml" />
+	  <None Remove="HostedApp\wwwroot\emptyModule.js" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="HostedApp\Views\Second.dothtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="HostedApp\Views\Default.dothtml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="HostedApp\wwwroot\emptyModule.js">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\DotVVM.Hosting.Maui\DotVVM.Hosting.Maui.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="HostedApp\wwwroot\" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-windows'))">

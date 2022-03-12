@@ -65,6 +65,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Scripts\dotvvm.webview.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Scripts\dotvvm.webview.js" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Folder Include="Platforms\Android\" />
 	  <Folder Include="Platforms\iOS\" />
 	  <Folder Include="Platforms\MacCatalyst\" />

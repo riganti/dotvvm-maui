@@ -1,40 +1,78 @@
 ﻿dotvvm.webview = dotvvm.webview || (function () {
-    window.external.receiveMessage(message => {
+    dotvvm.events.initCompleted.subscribe(notifyNavigationCompleted);
+    if (dotvvm.events.spaNavigated) {
+        dotvvm.events.spaNavigated.subscribe(notifyNavigationCompleted);
+    }
+
+    window.external.receiveMessage(async message => {
         // handler commands
-        if (message.action == "PatchViewModel") {
-            const result = dotvvm.viewModules.call(message.elementSelector, message.commandName, message.args, true);
-            sendMessage({
-                type: "handlerCommand",
-                messageId: message.messageId,
-                result: Promise.resolve(result)
-            });
+        message = JSON.parse(message);
+
+        const commands = {            
+            "GetViewModelSnapshot": () => {
+                const snapshot = { ...dotvvm.state };
+                delete snapshot.$csrfToken;
+                return snapshot;
+            },
+            "PatchViewModel": () => {
+                dotvvm.patchState(message.patch);
+                return null;
+            },
+            "CallNamedCommand": () => {
+                const element = message.elementSelector;
+                //const element = document.querySelector(message.elementSelector);
+                //if (!element) {
+                //    throw `Element with selector '${message.elementSelector}' not found!`;
+                //}
+                return dotvvm.viewModules.callNamedCommand(element, message.commandName, message.args, true);
+            }
         }
-        if (message.action == "GetViewModelSnapshot") {
+        const command = commands[message.action];
+        if (command) {
+            try {
+                const result = await command();
+                sendMessage({
+                    type: "handlerCommand",
+                    messageId: message.messageId,
+                    result: JSON.stringify(result)
+                });
+            }
+            catch (err) {
+                sendMessage({
+                    type: "handlerCommand",
+                    messageId: message.messageId,
+                    errorMessage: JSON.stringify(err)
+                });
+            }
+        } else {
             sendMessage({
                 type: "handlerCommand",
                 messageId: message.messageId,
-                result: JSON.stringify(dotvvm.state)
+                errorMessage: "Command not found!"
             });
-        } else if (message.action == "PatchViewModel") {
-            dotvvm.patchViewModel(message.patch);
-            sendMessage({
-                type: "handlerCommand",
-                messageId: message.messageId,
-                result: true
-            });
-        }
+        }        
     });
 
     function sendMessage(message) {
         window.external.sendMessage(message);
     }
     
-    return {
-        notifyNavigationCompleted(routeName) {
-            sendMessage({
-                type: "navigationCompleted",
-                routeName: routeName
-            });
-        }
+    function notifyNavigationCompleted() {
+        sendMessage({
+            type: "navigationCompleted",
+            routeName: dotvvm.routeName
+        });
     }
+
+    function sendPageNotification(methodName, args) {
+        sendMessage({
+            type: "pageNotification",
+            methodName: methodName,
+            args: args
+        });
+    }
+
+    return {
+        sendNotification: sendPageNotification
+    };
 })();
