@@ -7,15 +7,12 @@ using WebView2Control = Microsoft.UI.Xaml.Controls.WebView2;
 
 namespace DotVVM.Hosting.Maui.Controls
 {
-	/// <summary>
-	/// A <see cref="ViewHandler"/> for <see cref="BlazorWebView"/>.
-	/// </summary>
 	public partial class DotvvmWebViewHandler : ViewHandler<IDotvvmWebView, WebView2Control>
 	{
 		private WebView2WebViewManager? _webviewManager;
 
 		/// <inheritdoc />
-		protected override WebView2Control CreateNativeView()
+		protected override WebView2Control CreatePlatformView()
 		{
 			return new WebView2Control();
 		}
@@ -55,13 +52,13 @@ namespace DotVVM.Hosting.Maui.Controls
 			{
 				return;
 			}
-            if (NativeView == null)
+            if (PlatformView == null)
             {
                 throw new InvalidOperationException($"Can't start {nameof(DotvvmWebView)} without native web view instance.");
             }
 
 			_webviewManager = new WinUIWebViewManager(
-				NativeView,
+                PlatformView,
 				Services!,
 				Dispatcher.GetForCurrentThread()!,
 				Services!.GetRequiredService<DotvvmWebRequestHandler>(),

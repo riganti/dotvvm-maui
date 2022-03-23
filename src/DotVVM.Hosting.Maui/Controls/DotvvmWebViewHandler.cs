@@ -126,7 +126,7 @@ namespace DotVVM.Hosting.Maui.Controls
 		{
 			get
 			{
-				return NativeView.Source?.ToString();
+				return PlatformView.Source?.ToString();
 			}
 			set
 			{
