@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using DotVVM.Framework.Configuration;
 using DotVVM.Hosting.Maui.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -144,10 +145,11 @@ namespace DotVVM.Hosting.Maui.Controls
 
 		internal Action<PageNotificationEventArgs>? PageNotificationReceived;
 
+		private int messageIdCounter;
 
 		internal Task<dynamic> CallNamedCommand(string elementSelector, string commandName, object[] args)
 		{
-			var messageId = Guid.NewGuid();
+			var messageId = Interlocked.Increment(ref messageIdCounter);
 			var json = JsonConvert.SerializeObject(new CallNamedCommandMessage(elementSelector, commandName, args, messageId), serializerSettings.Value);
 			_webviewManager.SendMessage(json);
 			return WaitForMessage<dynamic>(messageId);
@@ -155,7 +157,7 @@ namespace DotVVM.Hosting.Maui.Controls
 
 		internal Task<dynamic> GetViewModelSnapshot()
 		{
-			var messageId = Guid.NewGuid();
+			var messageId = Interlocked.Increment(ref messageIdCounter);
 			var json = JsonConvert.SerializeObject(new GetViewModelSnapshotMessage(messageId), serializerSettings.Value);
 			_webviewManager.SendMessage(json);
 			return WaitForMessage<dynamic>(messageId);
@@ -163,7 +165,7 @@ namespace DotVVM.Hosting.Maui.Controls
 
 		internal Task PatchViewModel(object patch)
 		{
-			var messageId = Guid.NewGuid();
+			var messageId = Interlocked.Increment(ref messageIdCounter);
 			var json = JsonConvert.SerializeObject(new PatchViewModelMessage(patch, messageId), serializerSettings.Value);
 			_webviewManager.SendMessage(json);
 			return WaitForMessage<object>(messageId);
@@ -171,9 +173,9 @@ namespace DotVVM.Hosting.Maui.Controls
 
 
 
-		private Dictionary<Guid, TaskCompletionSource<string>> incomingMessageQueue = new();
+		private Dictionary<int, TaskCompletionSource<string>> incomingMessageQueue = new();
 
-		private async Task<T> WaitForMessage<T>(Guid messageId)
+		private async Task<T> WaitForMessage<T>(int messageId)
         {
 			var source = new TaskCompletionSource<string>();
 			incomingMessageQueue[messageId] = source;
@@ -181,16 +183,16 @@ namespace DotVVM.Hosting.Maui.Controls
 			return JsonConvert.DeserializeObject<T>(result);
         }
 
-		protected void OnMessageReceived(string message)
+		protected async void OnMessageReceived(string message)
         {
 			var data = JObject.Parse(message);
 			var type = data["type"].Value<string>();
 
-			if (type == "handlerCommand")
+			if (type == "HandlerCommand")
             {
 				// get response to the command from the handler
-				var messageId = data["messageId"].Value<string>();
-				incomingMessageQueue.Remove(Guid.Parse(messageId), out var source);
+				var messageId = data["id"].Value<int>();
+				incomingMessageQueue.Remove(messageId, out var source);
 
 				if (!data.TryGetValue("errorMessage", out var errorMessage))
                 {
@@ -201,7 +203,7 @@ namespace DotVVM.Hosting.Maui.Controls
 					source.SetException(new Exception("Command failed! " + errorMessage.Value<string>()));
                 }
 			}
-			else if (type == "navigationCompleted")
+			else if (type == "NavigationCompleted")
             {
 				var routeName = data["routeName"].Value<string>();
 				if (routeName != RouteName)
@@ -210,24 +212,42 @@ namespace DotVVM.Hosting.Maui.Controls
 					VirtualView.RouteName = routeName;
 				}
             }
-			else if (type == "pageNotification")
+			else if (type == "PageNotification")
             {
 				var args = new PageNotificationEventArgs(data["methodName"].Value<string>(), ((JArray)data["args"]).Values<object>().ToArray());
 				PageNotificationReceived?.Invoke(args);
             }
+			else if (type == "HttpRequest")
+            {
+				var messageId = data["id"].Value<int>();
+				var handler = Services.GetRequiredService<DotvvmWebRequestHandler>();
+				var response = await handler.ProcessRequest
+				(
+					new Uri(new Uri("https://0.0.0.0/"), data["url"].Value<string>()),
+					data["method"].Value<string>(),
+					((JObject)data["headers"]).Properties().Select(p => new KeyValuePair<string, string>(p.Name, p.Value.Value<string>())),
+					new MemoryStream(Encoding.UTF8.GetBytes(data["body"].Value<string>()))
+				);
+				var json = JsonConvert.SerializeObject(new HttpRequestMessage(response.StatusCode, response.Headers, Encoding.UTF8.GetString(response.Content.ToArray()), messageId), serializerSettings.Value);
+				_webviewManager.SendMessage(json);
+			}
         }
 	}
 
-	public record CallNamedCommandMessage(string elementSelector, string commandName, object[] args, Guid messageId)
+	public record CallNamedCommandMessage(string elementSelector, string commandName, object[] args, int messageId)
     {
 		public string action => nameof(DotvvmWebViewHandler.CallNamedCommand);
     }
-	public record GetViewModelSnapshotMessage(Guid messageId)
+	public record GetViewModelSnapshotMessage(int messageId)
 	{
 		public string action => nameof(DotvvmWebViewHandler.GetViewModelSnapshot);
 	}
-	public record PatchViewModelMessage(object patch, Guid messageId)
+	public record PatchViewModelMessage(object patch, int messageId)
 	{
 		public string action => nameof(DotvvmWebViewHandler.PatchViewModel);
+	}
+	public record HttpRequestMessage(int status, IEnumerable<KeyValuePair<string, string>> headers, string body, int messageId)
+    {
+		public string action => "HttpRequest";
 	}
 }

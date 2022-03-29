@@ -65,11 +65,23 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Scripts\dotvvm.webview.js" />
+	  <Compile Remove="node_modules\**" />
+	  <EmbeddedResource Remove="node_modules\**" />
+	  <MauiCss Remove="node_modules\**" />
+	  <MauiXaml Remove="node_modules\**" />
+	  <None Remove="node_modules\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Scripts\dotvvm.webview.js" />
+	  <None Remove="Scripts\dotvvm.webview.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Scripts\dotvvm.webview.ts" />
+	  <EmbeddedResource Include="obj/javascript/windows/dotvvm.webview.js" />
+	  <EmbeddedResource Include="obj/javascript/windows-debug/dotvvm.webview.js" />
+	  <EmbeddedResource Include="obj/javascript/android/dotvvm.webview.js" />
+	  <EmbeddedResource Include="obj/javascript/android-debug/dotvvm.webview.js" />
 	</ItemGroup>
 
 	<ItemGroup>

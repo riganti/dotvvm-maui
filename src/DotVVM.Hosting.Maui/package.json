@@ -1,0 +1,23 @@
+{
+  "name": "dotvvm.hosting.maui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c && rollup -c --environment BUILD:production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-replace": "4.0.0",
+    "@rollup/plugin-typescript": "8.3.1",
+    "@rollup/plugin-node-resolve": "13.1.3",
+    "@rollup/plugin-commonjs": "22.0.0-13",
+    "dotvvm-types": "3.1.0",
+    "rollup-plugin-terser": "7.0.2",
+    "rollup": "2.70.1",
+    "tslib": "2.3.1",
+    "typescript": "4.6.3"
+  }
+}

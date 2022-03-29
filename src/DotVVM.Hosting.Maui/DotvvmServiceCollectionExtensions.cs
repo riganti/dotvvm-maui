@@ -22,6 +22,7 @@ using DotVVM.Framework.Controls;
 using DotVVM.Framework.ResourceManagement;
 using Microsoft.Extensions.FileProviders;
 using DotVVM.Hosting.Maui.Binding;
+using DotVVM.Framework.Security;
 
 namespace DotVVM.Hosting.Maui
 {
@@ -63,13 +64,15 @@ namespace DotVVM.Hosting.Maui
 			environment.WebRootFileProvider = new PhysicalFileProvider(environment.WebRootPath);
 
 			builder.Services.AddSingleton<IWebHostEnvironment>(environment);
+			builder.Services.AddSingleton<ICsrfProtector, WebViewCsrfProtector>();
 			builder.Services.AddSingleton<RequestDelegate>(provider =>
 			{
 				var factory = new ApplicationBuilderFactory(provider);
 				var appBuilder = factory.CreateBuilder(new FeatureCollection());
 				appBuilder.UseDotVVM<TDotvvmStartup>(applicationPath, debug, config => 
 				{
-					config.Resources.Register("dotvvm.webview.js", new ScriptResource(new EmbeddedResourceLocation(typeof(DotvvmServiceCollectionExtensions).Assembly, "DotVVM.Hosting.Maui.Scripts.dotvvm.webview.js"))
+					var platform = GetPlatform() + (debug ? "_debug" : "");
+					config.Resources.Register("dotvvm.webview.js", new ScriptResource(new EmbeddedResourceLocation(typeof(DotvvmServiceCollectionExtensions).Assembly, $"DotVVM.Hosting.Maui.obj.javascript.{platform}.dotvvm.webview.js"))
                     {
 						Dependencies = new[] { ResourceConstants.DotvvmResourceName }
                     });
@@ -87,5 +90,15 @@ namespace DotVVM.Hosting.Maui
 			return builder;
 		}
 
-	}
+        private static string GetPlatform()
+        {
+#if WINDOWS
+			return "windows";
+#elif ANDROID
+			return "android";
+#else
+			throw new PlatformNotSupportedException();
+#endif
+		}
+    }
 }
