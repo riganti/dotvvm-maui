@@ -15,6 +15,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Framework", "..\dotv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Framework.Hosting.AspNetCore", "..\dotvvm\src\Framework\Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj", "{2F2AE110-6A77-4A58-8037-2138E48D9D69}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Analyzers.Vsix", "..\dotvvm\src\Analyzers\Analyzers.Vsix\DotVVM.Analyzers.Vsix.csproj", "{0D4574D0-6DF6-440F-8E6B-1169EA2F9336}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Analyzers.Package", "..\dotvvm\src\Analyzers\Analyzers.Package\DotVVM.Analyzers.Package.csproj", "{A92D9AAA-F887-4D62-8D77-119C518C003E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Analyzers.CodeFixes", "..\dotvvm\src\Analyzers\Analyzers.CodeFixes\DotVVM.Analyzers.CodeFixes.csproj", "{1A72B8D7-78BD-4016-AF33-037FC593EC96}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Analyzers", "..\dotvvm\src\Analyzers\Analyzers\DotVVM.Analyzers.csproj", "{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +51,22 @@ Global
 		{2F2AE110-6A77-4A58-8037-2138E48D9D69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F2AE110-6A77-4A58-8037-2138E48D9D69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F2AE110-6A77-4A58-8037-2138E48D9D69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D4574D0-6DF6-440F-8E6B-1169EA2F9336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D4574D0-6DF6-440F-8E6B-1169EA2F9336}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D4574D0-6DF6-440F-8E6B-1169EA2F9336}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D4574D0-6DF6-440F-8E6B-1169EA2F9336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A92D9AAA-F887-4D62-8D77-119C518C003E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A92D9AAA-F887-4D62-8D77-119C518C003E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A92D9AAA-F887-4D62-8D77-119C518C003E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A92D9AAA-F887-4D62-8D77-119C518C003E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A72B8D7-78BD-4016-AF33-037FC593EC96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A72B8D7-78BD-4016-AF33-037FC593EC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A72B8D7-78BD-4016-AF33-037FC593EC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A72B8D7-78BD-4016-AF33-037FC593EC96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +75,10 @@ Global
 		{05D16005-C893-4CBE-9B2D-12D87C9072D0} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
 		{90CAC798-3EEF-4FCA-ACA2-6C9FA0613EA5} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
 		{2F2AE110-6A77-4A58-8037-2138E48D9D69} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
+		{0D4574D0-6DF6-440F-8E6B-1169EA2F9336} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
+		{A92D9AAA-F887-4D62-8D77-119C518C003E} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
+		{1A72B8D7-78BD-4016-AF33-037FC593EC96} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
+		{1CAC8F42-8E7B-48CF-AAC4-57000D27BDF8} = {C540F5F2-7701-433B-B0C6-E14F7E10AC11}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61F7FB11-1E47-470C-91E2-47F8143E1572}

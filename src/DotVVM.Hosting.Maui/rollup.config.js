@@ -8,14 +8,14 @@ const build = process.env.BUILD || "debug";
 const production = build == "production";
 const suffix = production ? "" : "-debug";
 
-const config = ({ minify, platform }) => ({
+const config = ({ minify }) => ({
     input: './Scripts/dotvvm.webview.ts',
     output: [
         {
             format: 'esm',
-            dir: `./obj/javascript/${platform}${suffix}`,
+            dir: `./obj/javascript/root${suffix}`,
             sourcemap: true,
-            name: `dotvvm.webview.${platform}`
+            name: `dotvvm.webview`
         },
     ],
     plugins: [
@@ -25,9 +25,7 @@ const config = ({ minify, platform }) => ({
         }),
         resolve({ browser: true }),
         commonjs(),
-        replace({
-            "webviewCompileConstants.platform": `"${platform}"`
-        }),
+        replace(),
         
         minify && terser({
             ecma: 6,
@@ -77,6 +75,5 @@ const config = ({ minify, platform }) => ({
 })
 
 export default [
-    config({ minify: production, platform: "windows" }),
-    config({ minify: production, platform: "android" })
+    config({ minify: production })
 ]

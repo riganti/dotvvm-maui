@@ -13,11 +13,7 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "lib": [ "dom", "es2015.promise", "es5", "es6" ],
-    "module": "ES2015",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/dotvvm-types"
-    ]
+    "module": "ES2015"    
   },
   "exclude": [ "obj/**", "node_modules/**" ],
   "compileOnSave": false

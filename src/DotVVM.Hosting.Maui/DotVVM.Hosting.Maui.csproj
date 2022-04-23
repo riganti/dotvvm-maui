@@ -73,15 +73,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Scripts\dotvvm.webview.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Scripts\dotvvm.webview.ts" />
-	  <EmbeddedResource Include="obj/javascript/windows/dotvvm.webview.js" />
-	  <EmbeddedResource Include="obj/javascript/windows-debug/dotvvm.webview.js" />
-	  <EmbeddedResource Include="obj/javascript/android/dotvvm.webview.js" />
-	  <EmbeddedResource Include="obj/javascript/android-debug/dotvvm.webview.js" />
+	  <EmbeddedResource Include="obj/javascript/root/dotvvm.webview.js" />
+	  <EmbeddedResource Include="obj/javascript/root-debug/dotvvm.webview.js" />
 	</ItemGroup>
 
 	<ItemGroup>

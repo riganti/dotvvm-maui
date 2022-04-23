@@ -13,7 +13,7 @@ namespace DotVVM.Hosting.Maui.Binding
         internal static void RegisterJavascriptTranslations(JavascriptTranslatableMethodCollection collection)
         {
             collection.AddMethodTranslator(typeof(WebViewBindingApi), nameof(SendNotification), 
-                new GenericMethodCompiler(a => new JsInvocationExpression(a[0].Member("sendNotification"), a[1], a[2])));
+                new GenericMethodCompiler(a => new JsInvocationExpression(a[0].Member("sendPageNotification"), a[1], a[2])));
         }
 
     }
